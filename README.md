@@ -33,7 +33,7 @@ This project investigates the **real cost** of that privacy gain, how much perfo
 
 ## Key Findings
 
-### MLP performed well overall — but federated training showed consistent gaps
+### MLP performed well overall, but federated training showed consistent gaps
 
 | Setup | Accuracy | Precision | Recall | ROC-AUC |
 |:---|:---:|:---:|:---:|:---:|
