@@ -6,7 +6,7 @@ A comparative study of federated and centralized machine learning for binary cla
 
 Healthcare data is among the most sensitive and fragmented. Hospitals can't easily share patient records, yet ML models need large datasets to perform well. **Federated Learning** offers a solution: train models collaboratively without centralizing the data.
 
-This project investigates the **real cost** of that privacy gain — how much performance do we lose, and where exactly does federated training struggle?
+This project investigates the **real cost** of that privacy gain, how much performance do we lose, and where exactly does federated training struggle?
 
 ## The Experiment
 
@@ -67,10 +67,12 @@ Both centralized and federated SVM achieved ROC-AUC ~0.52 (near random), indicat
 - **Matplotlib** — visualization
 
 ## Project Structure
+
 ├── CÓDIGO Ivan Betriu.ipynb    # Full experiment notebook
 ├── TFM Ivan Betriu.pdf         # Complete thesis document (Spanish)
 ├── assets/                     # Figures and visualizations
 └── README.md
+
 ## Regulatory Context
 
 This work is framed within the **EU Data Strategy (2021-2027)**, analyzing how federated learning aligns with the Data Governance Act, Data Act, and GDPR requirements for privacy-preserving data analysis across institutions.
