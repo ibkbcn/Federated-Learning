@@ -16,20 +16,20 @@ This project investigates the **real cost** of that privacy gain, how much perfo
 - **MLP** (Multi-Layer Perceptron) with Binary Cross-Entropy
 - **Linear SVM** (SGD Classifier) with Hinge Loss
 
-**Training setups compared across 4 simulations:**
+**Training setups compared across 4 configurations:**
 
-| Simulation | Model | Data Distribution | Loss Function |
+| Configuration | Model | Data Distribution | Loss Function |
 |:---:|:---:|:---:|:---:|
 | 1 | MLP | IID | Binary Cross-Entropy |
 | 2 | MLP | Non-IID | Binary Cross-Entropy |
 | 3 | SVM | IID | Hinge |
 | 4 | SVM | Non-IID | Hinge |
 
-- **Centralized**: standard single-node training (1,000 epochs)
-- **Federated**: 10 nodes, FedAvg aggregation, 200 rounds × 5 local epochs
-- **IID**: data split randomly (balanced across nodes)
+- **Centralized**: standard single-node training (up to 1,000 epochs, early stopping)
+- **Federated**: 10 clients, FedAvg aggregation, up to 200 rounds × 5 local epochs, early stopping
+- **IID**: data split randomly (balanced across clients)
 - **Non-IID**: data split via Dirichlet distribution (α=0.5), creating realistic heterogeneity
-- Each simulation averaged over **5 independent runs**
+- Each configuration averaged over **5 independent runs** (seeds 42–46) for statistical robustness
 
 ## Key Findings
 
@@ -57,21 +57,57 @@ Even in the IID scenario, the gap between training and validation performance wa
 
 Both centralized and federated SVM achieved ROC-AUC ~0.52 (near random), indicating the linear model couldn't capture the underlying patterns in EEG data. Interestingly, the federated Non-IID SVM slightly outperformed its centralized counterpart.
 
+## Quick Start
+
+### Requirements
+
+```bash
+pip install -r requirements.txt
+```
+
+### Run
+
+Open and run `notebook.ipynb` sequentially. Each configuration (MLP IID, MLP Non-IID, SVM IID, SVM Non-IID) calls `run_simulation()` with the appropriate parameters. Results are saved as JSON files and plots are generated inline.
+
+> **Note:** Each full configuration (5 simulations × 200 max rounds) can take 15–30 min depending on hardware. Flower uses Ray internally for client simulation.
+
+### Dataset
+
+Download [Epileptic Seizure Recognition](https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition) and place `Epileptic Seizure Recognition.csv` in the same directory as the notebook.
+
 ## Tech Stack
 
-- **Python** — core language
-- **PyTorch** — model implementation (MLP and SVM with gradient descent)
-- **Flower (flwr)** — federated learning simulation framework
-- **scikit-learn** — preprocessing, metrics, validation
+- **Python 3.10+**
+- **PyTorch** — model implementation (MLP and LinearSVM with gradient descent)
+- **Flower (flwr)** — federated learning simulation framework (FedAvg strategy)
+- **scikit-learn** — preprocessing, calibration (Platt scaling for SVM), metrics
 - **Pandas / NumPy** — data manipulation
-- **Matplotlib** — visualization
+- **Matplotlib / Seaborn** — visualization (training curves, confusion matrices)
 
 ## Project Structure
 
-├── CÓDIGO Ivan Betriu.ipynb    # Full experiment notebook
-├── TFM Ivan Betriu.pdf         # Complete thesis document (Spanish)
+```
+├── notebook.ipynb              # Full experiment (all 4 configurations + aggregation)
+├── requirements.txt            # Python dependencies
 ├── assets/                     # Figures and visualizations
 └── README.md
+```
+
+### Notebook structure
+
+The notebook is organized in 15 sections:
+
+| Section | Description |
+|:---|:---|
+| 1–2 | Imports and global configuration |
+| 3–4 | Model definitions (MLP, LinearSVM) and loss functions (BCE, Hinge) |
+| 5 | Data loading, preprocessing, and partitioning (IID / Dirichlet) |
+| 6 | Flower components: FedAvg strategy with early stopping, client factory |
+| 7–8 | Centralized training loop and test evaluation |
+| 9 | Visualization utilities (training curves, confusion matrix comparison) |
+| 10 | `run_simulation()` — main function that orchestrates a full experiment |
+| 11–14 | Execution cells: MLP IID, MLP Non-IID, SVM IID, SVM Non-IID |
+| 15 | Aggregation of results across the 5 runs per configuration |
 
 ## Regulatory Context
 
@@ -79,10 +115,14 @@ This work is framed within the **EU Data Strategy (2021-2027)**, analyzing how f
 
 ## Limitations & Future Work
 
-- Models used are intentionally simple, the goal was comparing training paradigms, not maximizing performance
+- Models used are intentionally simple — the goal was comparing training paradigms, not maximizing performance
 - Only FedAvg was tested; advanced aggregation methods (FedProx, SCAFFOLD, FedMA) could mitigate the issues found
 - A single dataset was used; cross-domain validation would strengthen conclusions
 - Class imbalance mitigation techniques in federated settings remain unexplored
+
+## Thesis
+
+The complete thesis document (in Spanish) is available upon request. It covers the theoretical framework, regulatory analysis, full methodology, and extended discussion of results.
 
 ## Author
 
