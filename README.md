@@ -115,7 +115,7 @@ This work is framed within the **EU Data Strategy (2021-2027)**, analyzing how f
 
 ## Limitations & Future Work
 
-- Models used are intentionally simple — the goal was comparing training paradigms, not maximizing performance
+- Models used are intentionally simple: the goal was comparing training paradigms, not maximizing performance
 - Only FedAvg was tested; advanced aggregation methods (FedProx, SCAFFOLD, FedMA) could mitigate the issues found
 - A single dataset was used; cross-domain validation would strengthen conclusions
 - Class imbalance mitigation techniques in federated settings remain unexplored
