@@ -120,12 +120,6 @@ This work is framed within the **EU Data Strategy (2021-2027)**, analyzing how f
 - A single dataset was used; cross-domain validation would strengthen conclusions
 - Class imbalance mitigation techniques in federated settings remain unexplored
 
-## Thesis
-
-The complete thesis document (in Spanish) is available upon request. It covers the theoretical framework, regulatory analysis, full methodology, and extended discussion of results.
-
-## Author
-
 **Ivan Betriu Kahlenberg**
 Master's Thesis — M.Sc. Data Science, La Salle (Universitat Ramon Llull), 2025
 
