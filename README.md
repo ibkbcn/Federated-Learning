@@ -1,4 +1,4 @@
-# Federated Learning vs Centralized Training: Epileptic Seizure Detection
+# Federated Learning vs Centralized Learning: Epileptic Seizure Detection
 
 A comparative study of federated and centralized machine learning for binary classification of epileptic seizures using EEG brain frequency data, exploring privacy-preserving training in the context of EU data regulation.
 
