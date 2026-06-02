@@ -47,7 +47,6 @@ The most critical finding: federated training systematically favors the majority
 
 The Non-IID federated MLP dropped recall to **0.518** — nearly half the seizures were missed, despite maintaining high accuracy (0.90) due to the class imbalance.
 
-![Confusion Matrix Comparison](assets/confusion_matrix_comparison.png)
 
 ### The generalization gap is inherent to federation, not just Non-IID
 
