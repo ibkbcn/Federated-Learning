@@ -1,125 +1,130 @@
-# Federated Learning vs Centralized Learning: Epileptic Seizure Detection
+# Federated vs Centralized Learning: Epileptic Seizure Detection
 
-A comparative study of federated and centralized machine learning for binary classification of epileptic seizures using EEG brain frequency data, exploring privacy-preserving training in the context of EU data regulation.
+A comparative study of federated and centralized machine learning for binary classification of epileptic seizures from EEG signals, framed around privacy-preserving training under EU data regulation.
 
-## Why This Matters
+Master's Thesis in M.Sc. Data Science, La Salle (Universitat Ramon Llull), 2025. Mentored by T-Systems.
 
-Healthcare data is among the most sensitive and fragmented. Hospitals can't easily share patient records, yet ML models need large datasets to perform well. **Federated Learning** offers a solution: train models collaboratively without centralizing the data.
+## Why this matters
 
-This project investigates the **real cost** of that privacy gain, how much performance do we lose, and where exactly does federated training struggle?
+Healthcare data is among the most sensitive and fragmented data there is. Hospitals cannot freely share patient records, yet machine learning models need large datasets to perform well. Federated Learning offers a way out: train a shared model collaboratively without ever centralizing the raw data.
 
-## The Experiment
+This project measures the real cost of that privacy gain. How much performance do we lose, and where exactly does federated training break down?
 
-**Dataset:** Epileptic Seizure Recognition — 11,500 EEG signal windows (178 features each), binary classification: seizure vs. non-seizure.
+## The experiment
 
-**Models tested:**
-- **MLP** (Multi-Layer Perceptron) with Binary Cross-Entropy
-- **Linear SVM** (SGD Classifier) with Hinge Loss
+**Dataset:** Epileptic Seizure Recognition: 11,500 EEG signal windows (178 features each), binary classification: seizure vs. non-seizure.
 
-**Training setups compared across 4 configurations:**
+**Models:**
 
-| Configuration | Model | Data Distribution | Loss Function |
+- MLP (Multi-Layer Perceptron), Binary Cross-Entropy loss
+- Linear SVM (SGD classifier), Hinge loss
+
+**Four configurations, each run under both training paradigms:**
+
+| Configuration | Model | Data distribution | Loss |
 |:---:|:---:|:---:|:---:|
 | 1 | MLP | IID | Binary Cross-Entropy |
 | 2 | MLP | Non-IID | Binary Cross-Entropy |
 | 3 | SVM | IID | Hinge |
 | 4 | SVM | Non-IID | Hinge |
 
-- **Centralized**: standard single-node training (up to 1,000 epochs, early stopping)
-- **Federated**: 10 clients, FedAvg aggregation, up to 200 rounds × 5 local epochs, early stopping
-- **IID**: data split randomly (balanced across clients)
-- **Non-IID**: data split via Dirichlet distribution (α=0.5), creating realistic heterogeneity
-- Each configuration averaged over **5 independent runs** (seeds 42–46) for statistical robustness
+- **Centralized:** single-node training, up to 1,000 epochs, early stopping (100 epochs patience).
+- **Federated:** 10 clients, FedAvg aggregation, up to 200 rounds with early stopping.
+- **IID:** data split randomly and balanced across clients.
+- **Non-IID:** data split via Dirichlet distribution (alpha=0.5) to create realistic heterogeneity.
+- Each configuration averaged over **5 independent runs** (seeds 42-46).
 
-## Key Findings
+## Key findings
 
-### MLP performed well overall, but federated training showed consistent gaps
+### 1. In IID, federated matches centralized almost exactly
 
-| Setup | Accuracy | Precision | Recall | ROC-AUC |
-|:---|:---:|:---:|:---:|:---:|
-| Centralized | 0.948 | 0.916 | 0.812 | 0.948 |
-| Federated IID | 0.941 | 0.928 | 0.764 | 0.939 |
-| Federated Non-IID | 0.900 | 0.970 | 0.518 | 0.819 |
+| Setup | Accuracy | Loss | Precision | Recall | ROC-AUC |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| Centralized | 0.948 | 0.192 | 0.916 | 0.812 | 0.948 |
+| Federated IID | 0.941 | 0.233 | 0.928 | 0.764 | 0.939 |
+| Federated Non-IID | 0.900 | 0.737 | 0.970 | 0.518 | 0.819 |
 
-### Federated models develop a majority-class bias
+When data is identically distributed across clients, the federated MLP tracks the centralized model closely. The cost of decentralization is small, though the gap is real.
 
-The most critical finding: federated training systematically favors the majority class (non-seizure), **reducing recall for actual seizure cases**. In a medical context, this means more missed diagnoses.
+![MLP IID, training vs validation](assets/mlp_iid_convergence.png)
 
-The Non-IID federated MLP dropped recall to **0.518** — nearly half the seizures were missed, despite maintaining high accuracy (0.90) due to the class imbalance.
+*Legend: C = centralized, F = federated; training vs validation loss (left) and accuracy (right) over epochs.*
 
+### 2. Heterogeneity slows convergence and widens the gap
 
-### The generalization gap is inherent to federation, not just Non-IID
+Under Non-IID data, the federated model converges more slowly and far less stably. Validation loss stays high and oscillates for the first ~100 rounds before settling, while the centralized model is already stable. Convergence speed is, in effect, proportional to how heterogeneous the clients are.
 
-Even in the IID scenario, the gap between training and validation performance was larger for federated models than centralized ones. This suggests the FedAvg aggregation process itself introduces generalization challenges beyond data heterogeneity.
+![MLP Non-IID, training vs validation](assets/mlp_noniid_convergence.png)
 
-### SVM struggled regardless of training approach
+*Same axes and legend as above, now under Non-IID data.*
 
-Both centralized and federated SVM achieved ROC-AUC ~0.52 (near random), indicating the linear model couldn't capture the underlying patterns in EEG data. Interestingly, the federated Non-IID SVM slightly outperformed its centralized counterpart.
+### 3. Federated training develops a majority-class bias and misses seizures
 
-## Quick Start
+The most important finding. Federated training systematically favors the majority class (non-seizure), which collapses recall on the class that actually matters clinically. The Non-IID federated MLP dropped recall to **0.518** (nearly half of real seizures missed) while still posting 0.90 accuracy thanks to class imbalance. Accuracy hides the failure; recall exposes it.
 
-### Requirements
+![Confusion-matrix difference, Non-IID (Centralized minus Federated)](assets/mlp_noniid_confusion_diff.png)
+
+*How to read it: centralized minus federated counts per cell. Blue = federated predicts fewer there, red = more. The bottom row is the actual-seizure class.*
+
+### 4. The generalization gap is inherent to federation, not just to Non-IID
+
+Even in the IID scenario the train-to-validation gap is wider for the federated model than for the centralized one. This points to the FedAvg aggregation step itself introducing a generalization penalty, beyond what data heterogeneity explains.
+
+### 5. SVM underperformed regardless of paradigm
+
+Both centralized and federated linear SVM landed near random (ROC-AUC around 0.52-0.56), so the linear model simply could not capture the EEG patterns. Because the classifiers are essentially at chance, the apparent federated-vs-centralized differences here are not meaningful and are reported for completeness only.
+
+| Setup | Accuracy | Loss | Precision | Recall | ROC-AUC |
+|:---|:---:|:---:|:---:|:---:|:---:|
+| Centralized | 0.703 | 0.500 | 0.580 | 0.471 | 0.518 |
+| Federated IID | 0.845 | 0.506 | 0.746 | 0.361 | 0.525 |
+| Federated Non-IID | 0.838 | 0.492 | 0.669 | 0.405 | 0.557 |
+
+## Quick start
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Run
+Open `federated_vs_centralized.ipynb` and run it top to bottom. Each configuration calls `run_simulation()` with the appropriate parameters; results are saved as JSON and plots are generated inline.
 
-Open and run `notebook.ipynb` sequentially. Each configuration (MLP IID, MLP Non-IID, SVM IID, SVM Non-IID) calls `run_simulation()` with the appropriate parameters. Results are saved as JSON files and plots are generated inline.
+> A full configuration (5 runs x up to 200 rounds) takes roughly 15-30 min depending on hardware. Flower uses Ray internally for client simulation.
 
-> **Note:** Each full configuration (5 simulations × 200 max rounds) can take 15–30 min depending on hardware. Flower uses Ray internally for client simulation.
+**Dataset:** download the [Epileptic Seizure Recognition dataset](https://www.upf.edu/web/ntsa/downloads/-/asset_publisher/xvT6E4pczrBw/content/2012-nonrandomness-nonlinear-dependence-and-nonstationarity-of-electroencephalographic-recordings-from-epilepsy-patients) and place `Epileptic Seizure Recognition.csv` next to the notebook.
 
-### Dataset
+## Tech stack
 
-Download the [Epileptic Seizure Recognition dataset](https://www.upf.edu/web/ntsa/downloads/-/asset_publisher/xvT6E4pczrBw/content/2012-nonrandomness-nonlinear-dependence-and-nonstationarity-of-electroencephalographic-recordings-from-epilepsy-patients) and place `Epileptic Seizure Recognition.csv` in the same directory as the notebook.
+- Python 3.10+
+- PyTorch: model implementation (MLP and linear SVM via gradient descent)
+- Flower (flwr): federated learning simulation (FedAvg strategy)
+- scikit-learn: preprocessing, Platt-scaling calibration for SVM, metrics
+- Pandas / NumPy: data handling
+- Matplotlib / Seaborn: training curves and confusion-matrix figures
 
-## Tech Stack
-
-- **Python 3.10+**
-- **PyTorch** — model implementation (MLP and LinearSVM with gradient descent)
-- **Flower (flwr)** — federated learning simulation framework (FedAvg strategy)
-- **scikit-learn** — preprocessing, calibration (Platt scaling for SVM), metrics
-- **Pandas / NumPy** — data manipulation
-- **Matplotlib / Seaborn** — visualization (training curves, confusion matrices)
-
-## Project Structure
+## Project structure
 
 ```
-├── notebook.ipynb              # Full experiment (all 4 configurations + aggregation)
-├── requirements.txt            # Python dependencies
-├── assets/                     # Figures and visualizations
-└── README.md
+federated_vs_centralized.ipynb   # Full experiment: all 4 configurations + aggregation
+requirements.txt                 # Python dependencies
+assets/                          # Figures used in this README
+README.md
 ```
 
-### Notebook structure
+The notebook is organized in 15 sections: imports and global config (1-2), model and loss definitions (3-4), data loading and IID/Dirichlet partitioning (5), Flower components with early stopping (6), centralized training and test evaluation (7-8), visualization utilities (9), the `run_simulation()` orchestrator (10), the four execution blocks (11-14), and cross-run aggregation (15).
 
-The notebook is organized in 15 sections:
+## Regulatory context
 
-| Section | Description |
-|:---|:---|
-| 1–2 | Imports and global configuration |
-| 3–4 | Model definitions (MLP, LinearSVM) and loss functions (BCE, Hinge) |
-| 5 | Data loading, preprocessing, and partitioning (IID / Dirichlet) |
-| 6 | Flower components: FedAvg strategy with early stopping, client factory |
-| 7–8 | Centralized training loop and test evaluation |
-| 9 | Visualization utilities (training curves, confusion matrix comparison) |
-| 10 | `run_simulation()` — main function that orchestrates a full experiment |
-| 11–14 | Execution cells: MLP IID, MLP Non-IID, SVM IID, SVM Non-IID |
-| 15 | Aggregation of results across the 5 runs per configuration |
+The work is framed within the **EU Data Strategy (2021-2027)**, looking at how federated learning aligns with the Data Governance Act, the Data Act, and GDPR requirements for privacy-preserving analysis across institutions.
 
-## Regulatory Context
+## Limitations and future work
 
-This work is framed within the **EU Data Strategy (2021-2027)**, analyzing how federated learning aligns with the Data Governance Act, Data Act, and GDPR requirements for privacy-preserving data analysis across institutions.
+- Models are intentionally simple: the goal was comparing training paradigms, not maximizing raw performance.
+- Only FedAvg was tested; aggregation variants (FedProx, SCAFFOLD, FedMA) could mitigate the gaps found here.
+- A single dataset was used; cross-domain validation would strengthen the conclusions.
+- Class-imbalance mitigation in federated settings remains unexplored and is the most promising next step given finding 3.
 
-## Limitations & Future Work
-
-- Models used are intentionally simple: the goal was comparing training paradigms, not maximizing performance
-- Only FedAvg was tested; advanced aggregation methods (FedProx, SCAFFOLD, FedMA) could mitigate the issues found
-- A single dataset was used; cross-domain validation would strengthen conclusions
-- Class imbalance mitigation techniques in federated settings remain unexplored
+---
 
 **Ivan Betriu Kahlenberg**
-Master's Thesis — M.Sc. Data Science, La Salle (Universitat Ramon Llull), 2025
 
 [![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue)](https://www.linkedin.com/in/ivan-betriu-kahlenberg)
