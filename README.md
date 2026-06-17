@@ -10,7 +10,7 @@ This project investigates the **real cost** of that privacy gain, how much perfo
 
 ## The Experiment
 
-**Dataset:** [Epileptic Seizure Recognition] — 11,500 EEG signal windows (178 features each), binary classification: seizure vs. non-seizure.
+**Dataset:** Epileptic Seizure Recognition — 11,500 EEG signal windows (178 features each), binary classification: seizure vs. non-seizure.
 
 **Models tested:**
 - **MLP** (Multi-Layer Perceptron) with Binary Cross-Entropy
