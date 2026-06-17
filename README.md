@@ -72,7 +72,7 @@ Open and run `notebook.ipynb` sequentially. Each configuration (MLP IID, MLP Non
 
 ### Dataset
 
-Download [Epileptic Seizure Recognition](https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition) and place `Epileptic Seizure Recognition.csv` in the same directory as the notebook.
+Download [Epileptic Seizure Recognition]([https://archive.ics.uci.edu/ml/datasets/Epileptic+Seizure+Recognition](https://www.upf.edu/web/ntsa/downloads/-/asset_publisher/xvT6E4pczrBw/content/2012-nonrandomness-nonlinear-dependence-and-nonstationarity-of-electroencephalographic-recordings-from-epilepsy-patients?inheritRedirect=false&redirect=https%3A%2F%2Fwww.upf.edu%2Fweb%2Fntsa%2Fdownloads%3Fp_p_id%3D101_INSTANCE_xvT6E4pczrBw%26p_p_lifecycle%3D0%26p_p_state%3Dnormal%26p_p_mode%3Dview%26p_p_col_id%3Dcolumn-1%26p_p_col_count%3D1#.YkarCyhBxPY)) 
 
 ## Tech Stack
 
